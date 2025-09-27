@@ -32,14 +32,26 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
       <div id="status-dot" class="w-3 h-3 rounded-full bg-violet-500"></div>
       <h1 class="text-xl font-semibold text-violet-300">NeuroBand – StressSense</h1>
-      <span id="status-text" class="ml-auto text-sm opacity-80">Spokojnie</span>
+      <!-- stary napis „Spokojnie” zostawiamy, ale niech nie konkuruje z banerem -->
+      <span id="status-text" class="ml-auto text-sm opacity-60">Spokojnie</span>
       <button id="install-btn" class="ml-3 hidden px-3 py-1 text-sm pill bg-violet-600">Zainstaluj PWA</button>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- [5] Pastelowy baner statusu w widocznym miejscu -->
+    <section>
+      <div id="stress-banner" class="mx-auto max-w-4xl rounded-2xl px-4 py-3 text-center shadow-lg bg-green-200 text-green-950">
+        <div class="text-xs uppercase tracking-wide opacity-80">Stan</div>
+        <div id="stress-label" class="text-2xl font-bold">Spokojnie</div>
+        <div id="stress-sub" class="text-sm mt-1 opacity-80">Oddychaj miarowo</div>
+      </div>
+    </section>
+
     <section class="flex flex-wrap gap-3 items-center">
-      <button id="connect-btn" class="px-4 py-2 pill bg-violet-600">Połącz z NeuroBand (BLE)</button>
+      <!-- [4] Usunięto „(BLE)” -->
+      <button id="connect-btn" class="px-4 py-2 pill bg-violet-600">Połącz z NeuroBand</button>
       <button id="stop-btn" class="px-4 py-2 pill bg-slate-700">Zatrzymaj</button>
       <button id="demo-btn" class="px-4 py-2 pill bg-slate-800">Demo (mock)</button>
       <button id="export-btn" class="px-4 py-2 pill bg-slate-800">Eksport CSV</button>
@@ -50,14 +62,14 @@
       <div class="text-violet-300">Nie udało się połączyć z NeuroBand. Sprawdź zasilanie/zgody BLE. <b>Demo</b> uruchom ręcznie przyciskiem powyżej.</div>
     </section>
 
-    <!-- Charts: HR, GSR, Temp (SpO₂ usunięte) -->
+    <!-- Charts: HR, GSR, Temp -->
     <section class="grid md:grid-cols-3 gap-4">
       <div class="card p-4"><div class="flex items-baseline justify-between mb-2"><h3 class="text-base">Tętno</h3><div id="hr-value" class="text-2xl font-semibold">–</div></div><canvas id="hr-chart" height="140"></canvas></div>
       <div class="card p-4"><div class="flex items-baseline justify-between mb-2"><h3 class="text-base">GSR (µS)</h3><div id="gsr-value" class="text-2xl font-semibold">–</div></div><canvas id="gsr-chart" height="140"></canvas></div>
       <div class="card p-4"><div class="flex items-baseline justify-between mb-2"><h3 class="text-base">Temperatura</h3><div id="temp-value" class="text-2xl font-semibold">–</div></div><canvas id="temp-chart" height="140"></canvas></div>
     </section>
 
-    <!-- Interpretation + SI (bez SpO₂) -->
+    <!-- Interpretation + SI -->
     <section class="card p-4">
       <div class="flex items-center justify-between">
         <div>
@@ -72,7 +84,24 @@
       </div>
     </section>
 
-    <!-- Readings table (z jednostkami) -->
+    <!-- [3] Działające ćwiczenia oddechowe -->
+    <section id="relax" class="card p-4">
+      <h3 class="text-lg font-semibold mb-3">Ćwiczenia oddechowe</h3>
+      <div class="space-y-4">
+        <div class="flex gap-3 flex-wrap">
+          <button id="start-box" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700">Box 4–4–4–4</button>
+          <button id="start-478" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700">Metoda 4–7–8</button>
+          <button id="stop-breath" class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-800">Stop</button>
+        </div>
+        <div class="flex items-center gap-4">
+          <div id="breath-ball" class="w-28 h-28 rounded-full bg-violet-400 transition-all duration-1000"></div>
+          <div class="text-lg" id="breath-cue">Kliknij, aby rozpocząć.</div>
+        </div>
+        <p class="text-xs text-violet-200">Wskazówka: oddychaj przeponą; jeśli czujesz zawroty głowy — przerwij.</p>
+      </div>
+    </section>
+
+    <!-- Tabela odczytów -->
     <section class="card p-4">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-semibold">Tabela odczytów (ostatnie 60 s)</h3>
@@ -93,7 +122,7 @@
       </div>
     </section>
 
-    <!-- History & prefs quick view -->
+    <!-- Historia & preferencje -->
     <section class="grid md:grid-cols-2 gap-4">
       <div class="card p-4"><h3 class="text-lg font-semibold mb-2">Historia (ostatnie 14 dni)</h3><div id="history-list" class="space-y-2 text-sm"></div></div>
       <div class="card p-4">
@@ -109,7 +138,7 @@
     </section>
   </main>
 
-  <!-- Survey dialog (bez zmian merytorycznych) -->
+  <!-- Survey dialog -->
   <dialog id="survey-dialog" class="card p-0 w-[48rem] max-w-[98vw]">
     <form id="survey-form" class="contents">
       <div class="p-4 border-b border-violet-900 text-lg font-semibold flex items-center justify-between">
@@ -140,16 +169,19 @@
                 <label class="flex items-center gap-2"><input type="radio" name="activity_freq" value="5+" required> 5+</label>
               </div>
             </fieldset>
+
+            <!-- [1] WIELOKROTNY wybór chorób serca -->
             <fieldset class="md:col-span-2">
-              <legend class="mb-1">Choroba serca (jedna opcja)</legend>
+              <legend class="mb-1">Choroby serca (możesz wybrać kilka)</legend>
               <div class="grid md:grid-cols-2 gap-2">
-                <label class="flex items-center gap-2"><input type="radio" name="heart" value="none" required> Brak</label>
-                <label class="flex items-center gap-2"><input type="radio" name="heart" value="nyha12"> Niewydolność (NYHA I–II)</label>
-                <label class="flex items-center gap-2"><input type="radio" name="heart" value="svt"> Arytmie nadkomorowe stabilne</label>
-                <label class="flex items-center gap-2"><input type="radio" name="heart" value="sinus"> Tachykardia zatokowa przewlekła</label>
-                <label class="flex items-center gap-2"><input type="radio" name="heart" value="ihd"> Choroba niedokrwienna stabilna</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="heart" value="nyha12"> Niewydolność (NYHA I–II)</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="heart" value="svt"> Arytmie nadkomorowe stabilne</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="heart" value="sinus"> Tachykardia zatokowa przewlekła</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="heart" value="ihd"> Choroba niedokrwienna stabilna</label>
               </div>
+              <p class="text-xs opacity-70 mt-1">Pozostaw puste, jeśli nie dotyczy.</p>
             </fieldset>
+
             <label class="flex items-center gap-2 md:col-span-2"><input type="checkbox" name="hypertension" value="yes"> Nadciśnienie</label>
             <fieldset class="md:col-span-2">
               <legend class="mb-1">Choroba skóry (jedna opcja)</legend>
@@ -164,16 +196,16 @@
               <legend class="mb-1">Leki (jedna opcja)</legend>
               <div class="grid grid-cols-3 gap-2">
                 <label class="flex items-center gap-2"><input type="radio" name="drug" value="none" required> Brak</label>
-                <label class="flex items-center gap-2"><input type="radio" name="drug" value="beta"> Beta‑blokery</label>
+                <label class="flex items-center gap-2"><input type="radio" name="drug" value="beta"> Beta-blokery</label>
                 <label class="flex items-center gap-2"><input type="radio" name="drug" value="anxio"> Leki przeciwlękowe</label>
               </div>
             </fieldset>
           </div>
         </section>
 
-        <!-- Sekcja 2: Reakcje -->
+        <!-- [2] Zmieniony tytuł sekcji 2 -->
         <section class="space-y-3">
-          <h4 class="font-semibold text-base">Sekcja 2. Twoje typowe reakcje</h4>
+          <h4 class="font-semibold text-base">Sekcja 2. Twoje typowe reakcje na stres</h4>
           <div class="grid md:grid-cols-2 gap-2">
             <label class="flex items-center gap-2"><input type="checkbox" name="stress_body" value="hr"> Szybsze bicie serca</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="stress_body" value="sweat"> Pocenie się dłoni</label>
@@ -200,7 +232,7 @@
             <legend class="mb-1">Sugestie relaksacyjne</legend>
             <label class="flex items-center gap-2"><input type="radio" name="pref_relax" value="yes" required> Tak</label>
             <label class="flex items-center gap-2"><input type="radio" name="pref_relax" value="no" required> Nie</label>
-            <p class="text-xs opacity-70">(Ćwiczenia są wyłączone w tej wersji – preferencja zostanie zapisana.)</p>
+            <p class="text-xs opacity-70">(Ćwiczenia dostępne w panelu „Ćwiczenia oddechowe”.)</p>
           </fieldset>
         </section>
       </div>
@@ -230,7 +262,8 @@
       connected:false, streaming:false, samples:[],
       history: JSON.parse(localStorage.getItem('ss_history')||'[]'),
       thresholds: { tempHigh: 38, dHR: 12, gsrPct: 0.25, scr: 2 }, // bez SpO₂
-      profile: JSON.parse(localStorage.getItem('ss_profile')||'{"age":24,"sex":"F","activity_freq":"1-2","heart":"none","hypertension":false,"skin":"none","drug":"none","stress_body":[]}'),
+      // [1] heart: tablica (wielokrotny wybór)
+      profile: JSON.parse(localStorage.getItem('ss_profile')||'{"age":24,"sex":"F","activity_freq":"1-2","heart":[],"hypertension":false,"skin":"none","drug":"none","stress_body":[]}'),
       prefs: JSON.parse(localStorage.getItem('ss_prefs')||'{"alert":"strong","display":"categories","relax":"no"}'),
       vas: { rest: 3, cur: 3 },
       timers:{ mock:null, eval:null }, ble:{ device:null }
@@ -285,12 +318,20 @@
       while(tb.rows.length>60) tb.deleteRow(0);
     }
 
-    // ------------------ Multipliers (jak wcześniej) ------------------
+    // ------------------ Multipliers ------------------
     function m_HR_age(age){ if(age<=17) return 1.05; if(age<=29) return 1.03; if(age<=49) return 1.00; if(age<=64) return 0.95; return 0.90; }
     function m_GSR_age_sex(age,sex){ if(age<=17) return sex==='F'?1.12:1.14; if(age<=29) return sex==='F'?1.06:1.08; if(age<=49) return sex==='F'?1.00:1.02; if(age<=64) return sex==='F'?0.92:0.94; return sex==='F'?0.86:0.90; }
     function m_HR_fit(freq){ return freq==='0'?1.00: freq==='1-2'?0.98: freq==='3-4'?0.94: 0.90; }
     function m_GSR_fit(freq){ return 1.00; }
-    function m_HR_heart(v){ return { none:1.00, nyha12:1.12, svt:1.08, sinus:1.05, ihd:1.06 }[v] ?? 1.00; }
+    // [1] mapa mnożników dla WIELOKROTNYCH chorób serca
+    const HEART_MULTS = { nyha12:1.12, svt:1.08, sinus:1.05, ihd:1.06 };
+    function m_HR_heart_multi(arr){
+      if(!Array.isArray(arr) || !arr.length) return 1.00;
+      // mnożymy, a potem przycinamy sensownie
+      let m=1.00;
+      for(const k of arr){ m *= (HEART_MULTS[k] ?? 1.00); }
+      return clip(m, 1.00, 1.35);
+    }
     function m_GSR_skin(v){ return { none:1.00, eczema:1.30, psoriasis:1.25, dry:1.20 }[v] ?? 1.00; }
     function m_drug_hr(v){ return { none:1.00, beta:0.70, anxio:0.95 }[v] ?? 1.00; }
     function m_drug_gsr(v){ return { none:1.00, beta:1.00, anxio:0.95 }[v] ?? 1.00; }
@@ -298,9 +339,11 @@
 
     function computeMultipliers(){
       const p=S.profile; const age=Number(p.age||30); const sex=p.sex||'F'; const freq=p.activity_freq||'1-2';
-      let mHR = m_HR_age(age)*m_HR_fit(freq)*m_HR_heart(p.heart)*(p.hypertension?1.05:1.00)*m_drug_hr(p.drug);
+      // kompatybilność wstecz: jeśli ktoś ma zapisany string, zamieniamy na tablicę
+      const heartArr = Array.isArray(p.heart) ? p.heart : (p.heart && p.heart!=='none' ? [p.heart] : []);
+      let mHR = m_HR_age(age)*m_HR_fit(freq)*m_HR_heart_multi(heartArr)*(p.hypertension?1.05:1.00)*m_drug_hr(p.drug);
       let mGSR= m_GSR_age_sex(age,sex)*m_GSR_fit(freq)*m_GSR_skin(p.skin)*m_drug_gsr(p.drug);
-      mHR=clip(mHR,0.70,1.30); mGSR=clip(mGSR,0.70,1.30);
+      mHR=clip(mHR,0.70,1.35); mGSR=clip(mGSR,0.70,1.30);
       return { mHR, mGSR };
     }
 
@@ -327,6 +370,22 @@
         else { if(v>peak) peak=v; if(peak - v >= 0.02){ count++; rising=false; min=v; peak=v; } }
       }
       return count;
+    }
+
+    // ------------------ [5] Pastelowy baner – aktualizacja ------------------
+    function updateStressBanner({ level }) {
+      const banner = $('stress-banner');
+      const labelEl = $('stress-label');
+      const subEl = $('stress-sub');
+      const palette = {
+        calm:  { bg: 'bg-green-200',  fg: 'text-green-950',  label: 'Spokojnie',    sub: 'Oddychaj miarowo' },
+        warn:  { bg: 'bg-yellow-200', fg: 'text-yellow-950', label: 'Podwyższony',  sub: 'Spróbuj ćwiczenia 4–4–4–4' },
+        high:  { bg: 'bg-red-200',    fg: 'text-red-950',    label: 'Wysoki',       sub: 'Wykonaj metodę 4–7–8 przez 1–2 min' },
+      };
+      const p = palette[level] || palette.calm;
+      banner.className = `mx-auto max-w-4xl rounded-2xl px-4 py-3 text-center shadow-lg ${p.bg} ${p.fg}`;
+      labelEl.textContent = p.label;
+      subEl.textContent = p.sub;
     }
 
     // ------------------ Stress algorithm (co 10 s) ------------------
@@ -360,8 +419,14 @@
 
       siValue.textContent=SI.toFixed(2);
       let cat='Niski'; if(SI>=0.70) cat='Wysoki'; else if(SI>=0.50) cat='Średni'; siCat.textContent=cat;
+
+      // ikona w nagłówku
       if(alert){ statusDot.classList.remove('bg-violet-500'); statusDot.classList.add('bg-red-500'); statusText.textContent='Wysoki poziom stresu'; }
       else { statusDot.classList.remove('bg-red-500'); statusDot.classList.add('bg-violet-500'); statusText.textContent='Spokojnie'; }
+
+      // [5] Baner pastelowy – mapujemy kategorię do levelu
+      const level = SI>=0.70 ? 'high' : (SI>=0.50 ? 'warn' : 'calm');
+      updateStressBanner({ level });
 
       dynDhr.textContent = Math.round(dHR_thresh);
       const pct = Math.round(25*mGSR); dynGsr.textContent = `+${pct}%`;
@@ -435,7 +500,11 @@
       f.age.value = S.profile.age||24;
       (f.querySelector(`input[name=sex][value=${S.profile.sex||'F'}]`)||{}).checked = true;
       (f.querySelector(`input[name=activity_freq][value='${S.profile.activity_freq||'1-2'}']`)||{}).checked = true;
-      (f.querySelector(`input[name=heart][value='${S.profile.heart||'none'}']`)||{}).checked=true;
+
+      // [1] wielokrotne choroby serca
+      const heartArr = Array.isArray(S.profile.heart) ? S.profile.heart : (S.profile.heart && S.profile.heart!=='none' ? [S.profile.heart] : []);
+      f.querySelectorAll('input[name="heart"]').forEach(cb => { cb.checked = heartArr.includes(cb.value); });
+
       (f.querySelector(`input[name=skin][value='${S.profile.skin||'none'}']`)||{}).checked=true;
       (f.querySelector(`input[name=drug][value='${S.profile.drug||'none'}']`)||{}).checked=true;
       const hyp = f.querySelector('input[name=hypertension]'); if(hyp) hyp.checked = !!S.profile.hypertension;
@@ -452,7 +521,8 @@
         age:Number(form.get('age')),
         sex:form.get('sex'),
         activity_freq:form.get('activity_freq'),
-        heart:form.get('heart'),
+        // [1] zapisujemy tablicę wielu chorób
+        heart:selected('heart'),
         hypertension: !!form.get('hypertension'),
         skin:form.get('skin'),
         drug:form.get('drug'),
@@ -465,6 +535,56 @@
       surveyDlg.close();
     });
 
+    // ------------------ [3] Logika ćwiczeń oddechowych ------------------
+    let breathTimer = null;
+    function runBreathCycle(phases) {
+      clearInterval(breathTimer);
+      const ball = $('breath-ball');
+      const cue = $('breath-cue');
+      let i = 0, tLeft = phases[0].t;
+      cue.textContent = phases[0].label;
+      applyBallSize(ball, phases[0].size);
+      breathTimer = setInterval(() => {
+        tLeft -= 1;
+        if (tLeft <= 0) {
+          i = (i + 1) % phases.length;
+          tLeft = phases[i].t;
+          cue.textContent = phases[i].label;
+          applyBallSize(ball, phases[i].size);
+        }
+      }, 1000);
+    }
+    function applyBallSize(el, size) {
+      const map = { small: 'w-20 h-20', medium: 'w-28 h-28', large: 'w-40 h-40' };
+      el.className = `rounded-full bg-violet-400 transition-all duration-1000 ${map[size]}`;
+    }
+    function startBoxBreath() {
+      runBreathCycle([
+        { label: 'Wdech (4s)', t: 4, size: 'large' },
+        { label: 'Wstrzymaj (4s)', t: 4, size: 'large' },
+        { label: 'Wydech (4s)', t: 4, size: 'small' },
+        { label: 'Wstrzymaj (4s)', t: 4, size: 'small' },
+      ]);
+    }
+    function start478() {
+      runBreathCycle([
+        { label: 'Wdech (4s)', t: 4, size: 'large' },
+        { label: 'Wstrzymaj (7s)', t: 7, size: 'large' },
+        { label: 'Wydech (8s)', t: 8, size: 'small' },
+      ]);
+    }
+    function stopBreath() {
+      clearInterval(breathTimer);
+      breathTimer = null;
+      $('breath-cue').textContent = 'Kliknij, aby rozpocząć.';
+      applyBallSize($('breath-ball'), 'medium');
+    }
+    function initBreathingUI() {
+      $('start-box')?.addEventListener('click', startBoxBreath);
+      $('start-478')?.addEventListener('click', start478);
+      $('stop-breath')?.addEventListener('click', stopBreath);
+    }
+
     // ------------------ Live controls ------------------
     $('vas-cur').addEventListener('input', (e)=>{ S.vas.cur = Number(e.target.value); });
 
@@ -475,6 +595,8 @@
 
     // Init UI
     refreshHistoryUI();
+    initBreathingUI(); // [3]
+    updateStressBanner({ level: 'calm' }); // [5] inicjalny wygląd
     prefMode.textContent = (S.prefs.display==='scale10') ? 'skala 1–10' : 'kategorie';
     prefAlert.textContent = (S.prefs.alert==='all') ? 'lekki+silny' : 'silny';
 
